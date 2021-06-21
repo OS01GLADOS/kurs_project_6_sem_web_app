@@ -1,0 +1,58 @@
+{% extends 'webApp/base/base.html' %}
+{% block styles %}
+    .NewsContent{
+        margin: 0 0 10px 0;
+        display: flex;
+        flex-flow: row;
+        justify-content: space-between;
+    }
+    .article{
+        flex-flow: column;
+        text-align: start;
+        border: solid black 1px;
+        margin: 10px;
+        padding: 0 0 0 30px;
+    }
+    .PopularArticles{
+        text-align: start;
+        width: 500px;
+        height: 500px;
+        background-color: lightskyblue;
+    }
+    .popular-articles-link{
+        word-wrap: normal;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .LastArticles{
+        width: 100%;
+    }
+    .author{
+        color: lightsalmon;
+    }
+{% endblock %}
+{% block BodyContent %}
+    <div class="NewsContent">
+    {% if Article %}
+        <div class="LastArticles">
+            <h2>Последние статьи</h2>
+            {% for article_item in Article %}
+            <div class="article container rounded">
+                <h1>{{ article_item.Title }}</h1>
+                <p>{{ article_item.Preambule }}</p>
+                <p class="author">{{ article_item.Author.first_name }} {{ article_item.Author.last_name }}</p>
+                <a href="{% url 'webApp:article-index' article_index=article_item.id %}">читать далее...</a>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+        <div class="PopularArticles container rounded-bottom">
+            <h2>Популярные статьи</h2>
+            {% for elem in Popular_3_article %}
+            <a class="popular-articles-link" href="{% url 'webApp:article-index' article_index=elem.id %}">
+                <H3>{{  elem.Title }}</H3>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'webApp/base/base.html' %}
+{% block styles %}
+.feedback_form{
+    display: flex;
+    flex-flow: column;
+    text-align: start;
+    margin-top: 50px;
+    }
+{% endblock %}
+{% block BodyContent %}
+    <h3>Отправитель</h3>
+    <p>{{ message.Email }}</p>
+    <h3>текст сообщения</h3>
+    <p>{{ message.Message }}</p>
+    <form class="container feedback_form"  action="{% url 'webApp:feedback-index' message_index=message.id  %}" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="sender_email">email:</label>
+            <input id="sender_email" required class="form-control" type="email" name="sender_email" value="{{ message.Email}}">
+        </div>
+        <div class="form-group">
+            <label for="message_theme">Тема:</label>
+            <input id="message_theme" required pattern="^[\S]+.*" class="form-control" type="text" name="message_theme" placeholder="Тема сообщения" value="re:{{ message.header}}">
+        </div>
+        <div class="form-group">
+            <label for="message_text">Текст сообщения:</label>
+            <textarea minlength="5" required id="message_text" class="form-control" rows="10" name="message_text"></textarea>
+        </div>
+        <input class="btn btn-primary"  type="submit" value="отправить">
+    </form>
+{% endblock %}

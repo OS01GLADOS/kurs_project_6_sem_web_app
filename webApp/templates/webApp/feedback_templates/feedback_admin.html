@@ -1,0 +1,22 @@
+{% extends 'webApp/base/base.html' %}
+{% block styles %}
+    .message{
+        flex-flow: column;
+        text-align: start;
+        border: solid black 1px;
+        margin: 10px;
+    }
+{% endblock %}
+{% block BodyContent %}
+    {% if unreplyed_messages %}
+        {% for elem in unreplyed_messages %}
+            <div class="message container rounded">
+                <h1>{{ elem.header }}</h1>
+                <p>{{ elem.Email }}</p>
+                <a href="{% url 'webApp:feedback-index' message_index=elem.id %}">ответить</a>
+            </div>
+        {% endfor %}
+    {% else %}
+        <h5>Нет сообщений без ответа</h5>
+    {% endif %}
+{% endblock %}

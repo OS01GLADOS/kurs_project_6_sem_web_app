@@ -1,0 +1,119 @@
+{% extends 'webApp/base/base.html' %}
+{% block styles %}
+    .article-body{
+    text-align: start;
+    }
+    .bottom-inform{
+    color: lightsalmon;
+    }
+    .text-main{
+    word-wrap: break-word;
+    }
+{% endblock %}
+{%  block links %}
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script>
+        var isLiked = false
+        var isDisliked = false
+        var prev_reaction_var = 'none'
+        function getCookie(name) {
+            let matches = document.cookie.match(new RegExp(
+                "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+            ));
+            return matches ? decodeURIComponent(matches[1]) : undefined;
+        }
+        document.addEventListener("DOMContentLoaded", function(){
+            if (getCookie('reaction{{ current_article.id }}') != undefined){
+                prev_reaction_var = getCookie('reaction{{ current_article.id }}')
+                if(prev_reaction_var == "like")
+                {
+                    $('#dislike_btn').addClass('btn-primary')
+                    $('#like_btn').addClass('btn-outlined-primary')
+                    isLiked = true
+                }
+                else {
+                    $('#like_btn').addClass('btn-primary')
+                    $('#dislike_btn').addClass('btn-outlined-primary')
+                    isDisliked = true
+                }
+            }
+            else {
+                $('#dislike_btn').addClass('btn-primary')
+                $('#like_btn').addClass('btn-primary')
+            }
+        });
+        function send_like() {
+            if (isLiked){
+                send_reaction('none')
+                isLiked = false
+                isDisliked = false
+                $('#like_btn, #dislike_btn').removeClass('btn-outlined-primary').addClass('btn-primary')
+                document.cookie="reaction{{ current_article.id }}=like; max-age=0"
+                prev_reaction_var = "none"
+            }
+            else {
+                send_reaction('like')
+                isLiked = true
+                isDisliked = false
+                $('#dislike_btn').removeClass('btn-outlined-primary').addClass('btn-primary')
+                $('#like_btn').removeClass('btn-primary').addClass('btn-outlined-primary')
+                document.cookie="reaction{{ current_article.id }}=like;"
+                prev_reaction_var = "like"
+            }
+        }
+        function send_dislike() {
+            if (isDisliked){
+                send_reaction('none')
+                isDisliked = false
+                isLiked = false
+                $('#like_btn, #dislike_btn').removeClass('btn-outlined-primary').addClass('btn-primary')
+                document.cookie="reaction{{ current_article.id }}=dislike; max-age=0"
+                prev_reaction_var = "none"
+            }
+            else {
+                send_reaction('dislike')
+                isDisliked = true
+                isLiked = false
+                $('#like_btn').removeClass('btn-outlined-primary').addClass('btn-primary')
+                $('#dislike_btn').removeClass('btn-primary').addClass('btn-outlined-primary')
+                document.cookie="reaction{{ current_article.id }}=dislike;"
+                prev_reaction_var = "dislike"
+            }
+        }
+        function send_reaction(new_reaction) {
+            if(prev_reaction_var != null){
+                $.get('{{ current_article.id }}/reaction-'+new_reaction+',prev-'+prev_reaction_var,{},)
+            }
+            else{
+                $.get('{{ current_article.id }}/reaction-'+new_reaction+',prev-none',{})
+            }
+            prev_reaction_var = new_reaction
+        }
+        function update_likes_dislikes() {
+            $.get('{{ current_article.id }}/get-reaction',{},parse_mark_update_response)
+        }
+        function parse_mark_update_response(data,success) {
+            $("#like_btn").html('&#x1F44D; - '+data['likes']);
+            $('#dislike_btn').html('&#x1F44E; - '+data['dislikes']);
+
+        }
+        setInterval(update_likes_dislikes,5000);
+    </script>
+{% endblock %}
+{% block BodyContent %}
+    <div class="article-body container" onload="set_prev_reaction()">
+        <h2>{{ current_article.Title }}</h2>
+        <img height="400px"  src="{{ current_article.Photo.url }}">
+        <h5>{{ current_article.Preambule }}</h5>
+        <p class="text-main">
+            {% autoescape off %}
+			{{ text }}
+			{% endautoescape %}</p>
+        <p class="bottom-inform">{{ current_article.Updated }}</p>
+        <p class="bottom-inform">{{ author.first_name }} {{ author.last_name }}</p>
+        <div class="reaction-block">
+            <button id="like_btn" onclick="send_like()" type="button" class="btn ">&#x1F44D; - {{ current_article.Liked }}</button>
+            <button id="dislike_btn" onclick="send_dislike()"  type="button" class="btn ">&#x1F44E; - {{ current_article.Disliked }}</button>
+        </div>
+    </div>
+{% endblock %}
